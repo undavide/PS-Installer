@@ -94,7 +94,7 @@ You can configure the installer using properties of the global ```G``` object. H
 ###LOG_FILE
 Leave it as an empty string - will be created at runtime as ```LOG_FILE_PATH/PRODUCT_NAME.log```
 ###IGNORE
-[Array of String] RegExp for Files to ignore during installation, e.g. ["^\\.\\w+"] - remember to escape ```\```
+[Array of String] RegExp for Files to ignore during installation, e.g. ```["^\\.\\w+"]``` - remember to escape ```\```
 
 ---
 
