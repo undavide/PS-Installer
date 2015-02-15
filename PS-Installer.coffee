@@ -14,6 +14,10 @@
  * ===============================================
 ###
 
+###
+ * Globals
+ * @type {Object}
+###
 G = {
 
 	# INFO ======================================= 
@@ -201,6 +205,11 @@ class PSInstaller
 			Error.runtimeError 9002, "Bad Photoshop version.\n#{G.CURRENT_PS_VERSION} not in the range [#{G.MIN_VERSION}, #{G.MAX_VERSION}]"
 
 
+	###
+	 * Depending on the PS version, sets the available products options 
+	 * to install (@productsToInstall) and log them
+	 * @return {void}
+	###
 	init: () ->
 
 		that = @
@@ -290,7 +299,7 @@ class PSInstaller
 			unless G[product]
 				PSU.log "\n#{product} - Nothing to install\n"
 				continue
-			
+
 			switch product
 
 				when "SCRIPT"
@@ -302,7 +311,7 @@ class PSInstaller
 					destinationPath = "#{panelsPath}/#{G.PRODUCT_ID}" 
 
 				when "HTML_PANEL"
-					panelsPath = "#{if G.SYSTEM_INSTALL then Folder.commonFiles else Folder.userData}/Adobe/#{if G.CURRENT_PS_VERSION is 14 then 'CEPServiceManager4' else 'CEP'}/extensions"
+					panelsPath = "#{if G.SYSTEM_INSTALL then Folder.commonFiles else Folder.userData}/Adobe/#{if G.CURRENT_PS_VERSION is '14' then 'CEPServiceManager4' else 'CEP'}/extensions"
 					destinationPath = "#{panelsPath}/#{G.PRODUCT_ID}" 
 
 				when "MAC_PLUGIN"
