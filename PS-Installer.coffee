@@ -52,6 +52,7 @@ G = {
 
 	# DEBUG =====================================
 
+	INSTALLER_VERSION : "0.1.1" 
 	ENABLE_LOG	 : true
 	LOG_FILE_PATH: "~/Desktop" # no trailing /
 	# will be created as LOG_FILE_PATH / PRODUCT_NAME.log
@@ -178,6 +179,8 @@ class PSInstaller
 				\tApp Version: #{app.version}\n
 				\tOS: #{$.os}\n
 				\tLocale: #{$.locale}\n
+				---------------------------------------\n
+				\tInstaller Version: #{G.INSTALLER_VERSION}\n
 				=======================================
 				"
 
