@@ -1,7 +1,7 @@
 PS-Installer
 ============
 
-Multi-version, semi-automatic installation script for Adobe Photoshop ® Add-ons (because I'm *fed up* with Adobe Extension Manager aka AEM and the CC app).
+Multi-version, semi-automatic installation script for Adobe Photoshop ® Add-ons (Adobe Extension Manager **has been discontinued** so it will be of no use for CC2015 products. Please have a look at this [CC2015 Survival Guide](http://www.davidebarranca.com/2015/06/html-panel-tips-17-cc2015-survival-guide/) for more info).
 
 If you develop Photoshop add-ons and want them to be deployed to your users' machines avoiding AEM and/or Creative Clod app installation, this little project of mine might be of some use for you too.
 
@@ -96,11 +96,13 @@ Leave it as an empty string - will be created at runtime as ```LOG_FILE_PATH/PRO
 ###IGNORE
 [Array of String] RegExp for Files to ignore during installation, e.g. ```["^\\.\\w+"]``` - remember to escape ```\```
 
+This first looked to me like a clever idea, yet I've seen it might break Signing/Timestamping. As a temporary workaround in case of such kind of errors during installation, use ```IGNORE: ["$."]``` (which basically ignores nothing - don't let it empty, the regex will match everything).
+
 ---
 
 ## Supported Versions
 
-Currently PS-Installer has been tested from Photoshop CS6 onwards (up to CC 2014), but theoretically it is backward compatible down to CS3.
+Currently PS-Installer has been tested from Photoshop CS6 onwards (up to CC 2015), but theoretically it is backward compatible down to CS3.
 
 ## License
 Copyright (c) 2015 Davide Barranca, [MIT license](LICENSE).
