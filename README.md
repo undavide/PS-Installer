@@ -18,41 +18,44 @@ PS-Installer is able to deploy to their PS or System default folders:
 
 You can choose between per User installation and System wide installation.
 
-#In a nutshell
+# In a nutshell
 
 1. Distribute your product as a ZIP, let your users unZip it.
 2. Instruct the users to open Photoshop, ```File > Scripts > Browse...``` and point to the ```installer.jsx```
 3. The script will grab the assets for each product (say, an HTML Panel and a Script, or a Plugin) and deploy them into the correct folders depending on the PS version (i.e. HTML Panel for CC onwards, Flash one for CS6, etc.) 
 4. A complete LOG file is created, for debugging purposes
 
-An example folder tree is as follows:
+An example folder tree is as follows - find it in the project's example folder:
 
-	├── installer.jsx
-	│   
-	└── ASSETS
-	    │
-	    ├── SCRIPT
-	    │   ├── MyProduct
-	    │   │   ├── myFile1.jsxinc
-	    │   │   └── myFile2.jsxinc
-	    │   └── mainFile.jsx
-	    │
-	    ├── FLASH
-	    │   ├── CSXS
-	    │   │   └── example.xml
-	    │   └── example.swf
-	    │
-	    ├── HTML
-	    │   ├── CSXS
-	    │   │   └── example.xml
-	    │   └── example.html
-	    │
-	    ├── MAC_PLUGIN
-	    │   └── example.plugin
-	    │
-	    └── WIN_PLUGIN
-	        └── example.8bf
+	.
+	├── ASSETS
+	│   ├── FLASH
+	│   │   ├── CSXS
+	│   │   │   └── manifest.xml
+	│   │   └── example.swf
+	│   ├── HTML
+	│   │   ├── CSXS
+	│   │   │   └── manifest.xml
+	│   │   └── example.html
+	│   ├── MAC_PLUGIN
+	│   │   └── example.plugin
+	│   ├── SCRIPT
+	│   │   ├── Folder\ A
+	│   │   │   ├── Subfolder\ A
+	│   │   │   │   └── fileD.jsx
+	│   │   │   └── fileC.jsx
+	│   │   ├── Folder\ B
+	│   │   │   └── fileE.jsx
+	│   │   ├── fileA.jsx
+	│   │   └── fileB.jsx
+	│   ├── WIN_PLUGIN
+	│   │   └── example.8bf
+	│   └── readme.txt
+	└── installer.jsx
 
+
+# Uninstallation
+The installer, while deploying your assets, will write a uninstaller script in its same folder - this can be used later on to remove the product.
 
 #Options
 You can configure the installer using properties of the global ```G``` object. Here they are documented.

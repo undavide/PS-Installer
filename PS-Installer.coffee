@@ -20,24 +20,24 @@
 ###
 G = {
 
-	# INFO ======================================= 
+	### INFO =======================================  ###
 	
 	COMPANY         : "CS-EXTENSIONS"
 	CONTACT_INFO    : "support@cs-extensions.com"
 	PRODUCT_NAME    : "Test product"
 	PRODUCT_ID      : "com.cs-extensions.test"
-	PRODUCT_VERSION : "0.1.0"
+	PRODUCT_VERSION : "0.2.0"
 
-	# PRODUCTS ===================================
+	### PRODUCTS =================================== ###
 
-	# Photoshop versions range
-	# Leave undefined for no limit
+	### Photoshop versions range ###
+	### Leave undefined for no limit ###
 	MIN_VERSION	 : undefined
 	MAX_VERSION  : undefined
 
-	# Product Source Folders
-	# Leave undefined for no product to install
-	# Make sure tha paths (relative to the installer.jsx) do NOT start or end with "/"
+	### Product Source Folders ###
+	### Leave undefined for no product to install ###
+	### Make sure tha paths (relative to the installer.jsx) do NOT start or end with "/" ###
 	HTML_PANEL   : "ASSETS/HTML"
 	FLASH_PANEL  : "ASSETS/FLASH"
 	SCRIPT       : "ASSETS/SCRIPT"
@@ -45,25 +45,31 @@ G = {
 	WIN_PLUGIN   : "ASSETS/WIN_PLUGIN"
 	EXTRA        : undefined 
 	
-	# If you have a readme file to display, put it here (path and filename)
+	### If you have a readme file to display, put it here (path and filename) ###
 	README       : "ASSETS/readme.txt"
-	# System vs. User installation
+	### System vs. User installation ###
 	SYSTEM_INSTALL : false
 
-	# DEBUG =====================================
+	### DEBUG ===================================== ###
 
 	INSTALLER_VERSION : "0.1.1" 
-	ENABLE_LOG	 : true
-	LOG_FILE_PATH: "~/Desktop" # no trailing /
-	# will be created as LOG_FILE_PATH / PRODUCT_NAME.log
-	LOG_FILE     : ""
-	# Files to be ignored (escape "\" -> "\\")
-	IGNORE		 : [ 
-		"^\\.\\w+",	# starting with .
-		"^\\_\\w+", # starting with _
+	ENABLE_LOG : true
+	LOG_FILE_PATH: "~/Desktop" # no trailing / 
+	### will be created as LOG_FILE_PATH / PRODUCT_NAME.log ###
+	LOG_FILE : ""
+	### Array of RegExp for Files to be ignored (escape "\" -> "\\") 
+	Possibly a very bad idea, because the HTML Panel Signing and Timestamping
+	may easily get corrupted if something is missing in the folder.
+	Examples:
+	IGNORE		 : [  
+		"^\\.\\w+",	// starting with . 
+		"^\\_\\w+", // starting with _ 
 	]
+	Leaving undefined means: don't ignore
+	###
+	IGNORE : undefined
 	
-	# UTILS =====================================
+	### UTILS ===================================== ###
 
 	CURRENT_PATH : File($.fileName).path
 	CURRENT_PS_VERSION : app.version.split('.')[0]
@@ -77,8 +83,7 @@ G = {
  * License: http://www.opensource.org/licenses/bsd-license.php
 ###
 PSU = ((GLOBAL) ->
-
-	that = @
+	that = this
 	@enableLog      = undefined
 	@logFile        = undefined
 	@logFilePointer = undefined
@@ -107,10 +112,10 @@ PSU = ((GLOBAL) ->
 		unless fptr? then Error.runtimeError 19, "No Folder name specified" 
 		fptr = new Folder fptr if fptr.constructor is String
 		
-		# Recursion if the arg is a File
+		### Recursion if the arg is a File ###
 		return createFolder fptr.parent if fptr instanceof File
 
-		# Are we done?
+		### Are we done? ###
 		return true if fptr.exists
 
 		unless fptr instanceof Folder
@@ -120,9 +125,9 @@ PSU = ((GLOBAL) ->
 		if fptr.parent? and not fptr.parent.exists
 			return false unless createFolder fptr.parent
 
-		# eventually...!
+		### eventually...! ###
 		rc = fptr.create()
-		unless rc then Error.runtimeError 9002, "Unable to create folder '#{fptr}' (#{fptr.error})\nPlease create it manually and run this script again."
+		unless rc then Error.runtimeError 9002, "Unable to create folder #{fptr} (#{fptr.error})\nPlease create it manually and run this script again."
 		return rc
 
 	###
@@ -132,11 +137,11 @@ PSU = ((GLOBAL) ->
 	 * @return {void}               
 	###
 	init = (logFile, isLogEnabled) ->
-		
-		# LOG Stuff
+		return unless isLogEnabled
+		### LOG Stuff ###
 		that.enableLog = isLogEnabled
 		that.logFile   = logFile
-		# Create Log File Pointer
+		### Create Log File Pointer ###
 		file = new File that.logFile
 		if file.exists then file.remove()
 		unless file.open 'w' then throwFileError file, "Unable to open Log file"
@@ -145,13 +150,14 @@ PSU = ((GLOBAL) ->
 		return
 
 	return {
+		"isMac"            : isMac
 		"exceptionMessage" : exceptionMessage
 		"log"              : log
 		"createFolder"     : createFolder
 		"init"             : init
 	}
 
-	)()
+	)(this)
 
 class PSInstaller
 
@@ -160,14 +166,17 @@ class PSInstaller
 	 * @return {void} 
 	###
 	constructor: () ->
-		# set the log file name
+		### set the log file name ###
 		G.LOG_FILE = "#{G.LOG_FILE_PATH}/#{G.PRODUCT_NAME}.log"
-		# init the logging
+		### init the logging ###
 		PSU.init G.LOG_FILE, G.ENABLE_LOG
-		# SCRIPT, FLASH_PANEL, etc.
+		### SCRIPT, FLASH_PANEL, etc. ###
 		@productsToInstall = []
-		# All the folders to be copied
+		### All the folders to be copied (relative to the ASSETS path) ###
 		@foldersList = []
+		### List of Deployed Files and Folder - to be used by the uninstaller ###
+		@installedFiles = []
+		@installedFolders = []
 
 		PSU.log "
 				=======================================\n
@@ -217,8 +226,8 @@ class PSInstaller
 
 		that = @
 
-		# Depending on the PS version, what to install
-		# (not the classiest way I know but it works)
+		### Depending on the PS version, what to install
+		(not the classiest way I know but it works) ###
 		dependencyObj = {
 			"10" : [ 				"SCRIPT", "MAC_PLUGIN", "WIN_PLUGIN", "EXTRA"]  # CS3
 			"11" : [ "FLASH_PANEL", "SCRIPT", "MAC_PLUGIN", "WIN_PLUGIN", "EXTRA"]	# CS4
@@ -229,7 +238,7 @@ class PSInstaller
 			"16" : [ "HTML_PANEL",  "SCRIPT", "MAC_PLUGIN", "WIN_PLUGIN", "EXTRA"]	# CC 2015
 		}
 
-		# Array
+		### Array ###
 		@productsToInstall = dependencyObj[G.CURRENT_PS_VERSION]
 
 		PSU.log "\nItems to be installed
@@ -264,6 +273,7 @@ class PSInstaller
 			destinationToWriteFolder = Folder destinationToWriteString
 			unless destinationToWriteFolder.exists then destinationToWriteFolder.create()
 			PSU.log "Created Folder:\t#{destinationToWriteFolder.fsName}"
+			that.installedFolders.push "#{destinationToWriteFolder.fsName}"
 			destinationToWriteFolder
 
 		###
@@ -295,8 +305,11 @@ class PSInstaller
 			for eachFile in filesList
 				if File(eachFile).exists 
 					File(eachFile).copy "#{folder}/#{File(eachFile).name}"
+					### For the uninstaller ###
+					that.installedFiles.push "#{folder}/#{File(eachFile).name}"
 					PSU.log "Copied:\t\t#{File(eachFile).name}"
 
+		### Routine ###
 		for product in @productsToInstall
 
 			unless G[product]
@@ -332,31 +345,32 @@ class PSInstaller
 					destinationPath = "#{pluginsPath}/#{G.COMPANY}"
 
 				when "EXTRA"
-					destinationPath = G.EXTRA
+					### TODO ###
+					destinationPath = G.EXTRA 
 					
 			if destinationPath is "" then continue
 			PSU.log "\n\nAdding #{product}\n----------------------------\nDestination folder: #{Folder(destinationPath).fsName}"
-			# Create destination Folder
+			### Create destination Folder ###
 			if PSU.createFolder destinationPath then PSU.log "Destination Folder successfully created.\n" else PSU.log "ERROR! Can't create destination folder."
 
-			# Create the Folder for the source from the string path
+			### Create the Folder for the source from the string path ###
 			sourceFolder = Folder "#{G.CURRENT_PATH}/#{G[product]}"
-			# Create the Folder for the destination from the string path
+			### Create the Folder for the destination from the string path ###
 			destinationFolder = Folder destinationPath 
-			# Reset the array containing all the folders to be created in the destination
+			### Reset the array containing all the folders to be created in the destination ###
 			@foldersList = []
-			# Fill the foldersList
+			### Fill the foldersList ###
 			PSU.log "List of Folders to be copied for the #{product}:"
-			# Log is in the getFolderl
+			### Log is in the getFolderl ###
 			getFoldersList sourceFolder
-			# Add the root folder to the list
+			### Add the root folder to the list ###
 			@foldersList.unshift sourceFolder
 			PSU.log "Folder: #{sourceFolder}"
 
-			# Create Folders tree in destination
+			### Create Folders tree in destination ###
 			PSU.log "\nCreating Folders in destination and copying files:\n"
-			# RegExp for ignoring files to be copied
-			ignoreRegExp = new RegExp (G.IGNORE.join "|"), "i"
+			### RegExp for ignoring files to be copied ###
+			ignoreRegExp = if G.IGNORE then new RegExp((G.IGNORE.join "|"), "i") else new RegExp "$."
 
 			for eachFolder in @foldersList
 				saveFolder = createRelativeFolder destinationFolder, eachFolder, sourceFolder
@@ -376,16 +390,83 @@ class PSInstaller
 		alert "Restart Photoshop\nYou must restart the application in orded to use #{G.PRODUCT_NAME}, thank you!"
 		if G.README then (File "#{G.CURRENT_PATH}/#{G.README}").execute()
 
+	createUninstaller: () ->
+		
+		uninstall = (files, folders) ->
+			return unless performInstallation = confirm "#{G.PRODUCT_NAME} Version #{G.PRODUCT_VERSION} Uninstaller\nAre you sure to remove #{G.PRODUCT_NAME}?"
+			uninstallErrors = false
+			G.LOG_FILE = "#{G.LOG_FILE_PATH}/#{G.PRODUCT_NAME} Uninstaller.log"
+			### init the logging ###
+			PSU.init G.LOG_FILE, true
+			PSU.log "
+				=======================================\n
+				#{new Date()}\n
+				\tCompany: #{G.COMPANY}\n
+				\tProduct: #{G.PRODUCT_NAME}\n
+				\tProduct version: #{G.PRODUCT_VERSION}\n
+				\tApp: #{BridgeTalk.appName}\n
+				\tApp Version: #{app.version}\n
+				\tOS: #{$.os}\n
+				\tLocale: #{$.locale}\n
+				---------------------------------------\n
+				\tInstaller Version: #{G.INSTALLER_VERSION}\n
+				=======================================
+				"
+			
+			PSU.log "\nRemoving FILES..."
+
+			for eachFile in files
+				try 
+					file = File eachFile
+					PSU.log "Removing:\t#{file.fsName}..."
+					file.remove()
+					PSU.log "Done!"
+				catch e
+					PSU.log "ERROR!"
+					uninstallErrors = true
+			PSU.log "---------------------------------------\n
+					Removing FOLDERS..."
+
+			for eachFolder in folders by -1
+				try
+					folder = Folder eachFolder
+					PSU.log "Removing:\t#{folder.fsName}..."
+					folder.remove()
+					PSU.log "Done!"
+				catch e
+					PSU.log "ERROR!"
+					uninstallErrors = true
+				
+				if uninstallErrors 
+					alert "Something went wrong!\nA uninstallation LOG file has been created in:\n#{G.LOG_FILE}, please send it to #{G.CONTACT_INFO}"
+					throw Error "Restart Photoshop and see if the product has been uninstalled anyway."
+			
+			alert "#{G.PRODUCT_NAME} successfully Removed\nPlease Restart Photoshop for the changes to take effect."
+
+		uninstaller = new File "#{G.CURRENT_PATH}/#{G.PRODUCT_NAME}_V#{G.PRODUCT_VERSION} - UNINSTALLER.jsx"
+		unless uninstaller.open 'w' then throwFileError uninstaller, "Unable to Write the Uninstaller file"
+		uninstaller.lineFeed = 'unix' if PSU.isMac()
+		uninstaller.writeln "var G = #{G.toSource()}"
+		### This won't work :-/
+		uninstaller.writeln "var PSU = #{PSU.toSource()}" ###
+		uninstaller.writeln "var PSU=(function(GLOBAL){var createFolder,exceptionMessage,init,isMac,isWindows,log,that,throwFileError;that=this;this.enableLog=void 0;this.logFile=void 0;this.logFilePointer=void 0;isWindows=function(){return $.os.match(/windows/i);};isMac=function(){return!isWindows();};throwFileError=function(f,msg){if(msg==null){msg='';}return Error.runtimeError(9002,''+msg+''+f+': '+f.error+'.');};exceptionMessage=function(e){var fname,str;fname=!e.fileName?'???':decodeURI(e.fileName);str='  Message: '+e.message+'	File: '+fname+'\\tLine: '+(e.line||'???')+'\\n\\tError Name: '+e.name+'\\n\\tError Number: '+e.number;if($.stack){str+='  '+$.stack;}return str;};log=function(msg){var file;if(!that.enableLog){return;}file=that.logFilePointer;if(!file.open('e')){throwFileError(file,'Unable to open Log file');}file.seek(0,2);if(!file.writeln(''+msg)){return throwFileError(file,'Unable to write to log file');}};createFolder=function(fptr){var rc;if(fptr==null){Error.runtimeError(19,'No Folder name specified');}if(fptr.constructor===String){fptr=new Folder(fptr);}if(fptr instanceof File){return createFolder(fptr.parent);}if(fptr.exists){return true;}if(!(fptr instanceof Folder)){log(fptr.constructor);Error.runtimeError(21,'Folder is not a Folder?');}if((fptr.parent!=null)&&!fptr.parent.exists){if(!createFolder(fptr.parent)){return false;}}rc=fptr.create();if(!rc){Error.runtimeError(9002,'Unable to create folder '+fptr+' ('+fptr.error+') Please create it manually and run this script again.');}return rc;};init=function(logFile,isLogEnabled){var file;if(!isLogEnabled){return;}that.enableLog=isLogEnabled;that.logFile=logFile;file=new File(that.logFile);if(file.exists){file.remove();}if(!file.open('w')){throwFileError(file,'Unable to open Log file');}if(isMac()){file.lineFeed='unix';}that.logFilePointer=file;};return{'isMac':isMac,'exceptionMessage':exceptionMessage,'log':log,'createFolder':createFolder,'init':init};})(this);"
+		uninstaller.writeln "var filesToRemove = #{@installedFiles.toSource()};"
+		uninstaller.writeln "var foldersToRemove = #{@installedFolders.toSource()};"
+		uninstaller.writeln "var uninstall = #{uninstall.toSource()};"
+		uninstaller.writeln "uninstall(filesToRemove, foldersToRemove);"
+		uninstaller.close()
+
 try
 	psInstaller = new PSInstaller()
 	psInstaller.preflight()
 	psInstaller.init()
 	psInstaller.copy()
+	psInstaller.createUninstaller()
 	psInstaller.wrapUp()	
 catch e
 	errorMessage = "Installation failed: #{PSU.exceptionMessage e}"
 	PSU.log errorMessage
-	alert "Something went wrong!\n#{errorMessage}\nPlease contact #{G.CONTACT_INFO}"
+	alert "Something went wrong!\n#{errorMessage}\nPlease contact #{G.CONTACT_INFO}, thank you."
 
-# EOF
+### EOF ###
 "psInstaller"
