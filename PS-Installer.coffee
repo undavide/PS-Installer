@@ -15,66 +15,10 @@
 ###
 
 ###
- * Globals
- * @type {Object}
+ * Global object from the JSON
 ###
-G = {
 
-	### INFO =======================================  ###
-	
-	COMPANY         : "CS-EXTENSIONS"
-	CONTACT_INFO    : "support@cs-extensions.com"
-	PRODUCT_NAME    : "Test product"
-	PRODUCT_ID      : "com.cs-extensions.test"
-	PRODUCT_VERSION : "0.2.0"
-
-	### PRODUCTS =================================== ###
-
-	### Photoshop versions range ###
-	### Leave undefined for no limit ###
-	MIN_VERSION	 : undefined
-	MAX_VERSION  : undefined
-
-	### Product Source Folders ###
-	### Leave undefined for no product to install ###
-	### Make sure tha paths (relative to the installer.jsx) do NOT start or end with "/" ###
-	HTML_PANEL   : "ASSETS/HTML"
-	FLASH_PANEL  : "ASSETS/FLASH"
-	SCRIPT       : "ASSETS/SCRIPT"
-	MAC_PLUGIN   : "ASSETS/MAC_PLUGIN"
-	WIN_PLUGIN   : "ASSETS/WIN_PLUGIN"
-	EXTRA        : undefined 
-	
-	### If you have a readme file to display, put it here (path and filename) ###
-	README       : "ASSETS/readme.txt"
-	### System vs. User installation ###
-	SYSTEM_INSTALL : false
-
-	### DEBUG ===================================== ###
-
-	INSTALLER_VERSION : "0.1.1" 
-	ENABLE_LOG : true
-	LOG_FILE_PATH: "~/Desktop" # no trailing / 
-	### will be created as LOG_FILE_PATH / PRODUCT_NAME.log ###
-	LOG_FILE : ""
-	### Array of RegExp for Files to be ignored (escape "\" -> "\\") 
-	Possibly a very bad idea, because the HTML Panel Signing and Timestamping
-	may easily get corrupted if something is missing in the folder.
-	Examples:
-	IGNORE		 : [  
-		"^\\.\\w+",	// starting with . 
-		"^\\_\\w+", // starting with _ 
-	]
-	Leaving undefined means: don't ignore
-	###
-	IGNORE : undefined
-	
-	### UTILS ===================================== ###
-
-	CURRENT_PATH : File($.fileName).path
-	CURRENT_PS_VERSION : app.version.split('.')[0]
-
-}
+G = $.evalFile "#{File($.fileName).path}/init.json"
 
 ###
  * Utility functions
@@ -166,6 +110,8 @@ class PSInstaller
 	 * @return {void} 
 	###
 	constructor: () ->
+        
+        
 		### set the log file name ###
 		G.LOG_FILE = "#{G.LOG_FILE_PATH}/#{G.PRODUCT_NAME}.log"
 		### init the logging ###
