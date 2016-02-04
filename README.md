@@ -57,46 +57,46 @@ An example folder tree is as follows - find it in the project's example folder:
 # Uninstallation
 The installer, while deploying your assets, will write a uninstaller script in its same folder - this can be used later on to remove the product.
 
-#Options
-You can configure the installer using properties of the global ```G``` object. Here they are documented.
+# Options
+You can configure the installer using properties of the object contained in the  ```init.json``` sidecar file (which must be included alongside the ```installer.jsx```). Here they are documented.
 
-###COMPANY
+### COMPANY
 [String] - Your company's name 
-###CONTACT_INFO
+### CONTACT_INFO
 [String] - The email for customer support inquiries.
-###PRODUCT_NAME
+### PRODUCT_NAME
 [String] - The descriptive name of the product to install.
-###PRODUCT_ID
+### PRODUCT_ID
 [String] - Needed for Panels: ID as a reverse URL (e.g. com.cs-extensions.VitaminBW)
-###PRODUCT_VERSION
+### PRODUCT_VERSION
 [String] - Yours (not PS), to be written in the LOG file
-###MIN_VERSION
+### MIN_VERSION
 [Number] - Minimum Photoshop version required (e.g. 13.0), leave ```undefined``` for no limit.
-###MAX_VERSION
+### MAX_VERSION
 [Number] - Maximum Photoshop version supported (e.g. 15.2), leave ```undefined``` for no limit.
-###HTML_PANEL
+### HTML_PANEL
 [String] - Relative Path for HTML Panel (no ```/``` at the start or end, e.g. "ASSETS/HTML")
-###FLASH_PANEL
+### FLASH_PANEL
 [String] - Relative Path for Flash Panel (no ```/``` at the start or end, e.g. "ASSETS/FLASH")
-###SCRIPT
+### SCRIPT
 [String] - Relative Path for Script (no ```/``` at the start or end, e.g. "ASSETS/SCRIPT")
-###MAC_PLUGIN
+### MAC_PLUGIN
 [String] - Relative Path for Mac Plugin (no ```/``` at the start or end, e.g. "ASSETS/MAC")
-###WIN_PLUGIN
+### WIN_PLUGIN
 [String] - Relative Path for Win Plugin (no ```/``` at the start or end, e.g. "ASSETS/WIN")
-###EXTRA
+### EXTRA
 [String] - Relative Path for Extra content (no ```/``` at the start or end, e.g. "ASSETS/EXTRA") - **not supported yet**
-###README
+### README
 [String] - Relative Path for the optional Readme file (e.g. "ASSETS/Readme.txt")
-###SYSTEM_INSTALL
-[Boolean] - true: install the Panel (if present) for all users - false: install it only for the current user.
-###ENABLE_LOG
+### SYSTEM_INSTALL
+[Boolean] - true: install the Panel (if present) for all users - false: install it only for the current user. There's an open issue under Windows with Photoshop @64bit and Global installation - please set ```SYSTEM_INSTALL = false```.
+### ENABLE_LOG
 [Boolean] - Enable installation logging (highly recommended)
-###LOG_FILE_PATH
+### LOG_FILE_PATH
 [String] - Absolute Path for the LOG file, (no ```/``` at the start or end, e.g. "~/Desktop")
-###LOG_FILE
+### LOG_FILE
 Leave it as an empty string - will be created at runtime as ```LOG_FILE_PATH/PRODUCT_NAME.log```
-###IGNORE
+### IGNORE
 [Array of String] RegExp for Files to ignore during installation, e.g. ```["^\\.\\w+"]``` - remember to escape ```\```
 
 This first looked to me like a clever idea, yet I've seen it might break Signing/Timestamping. As a temporary workaround in case of such kind of errors during installation, use ```IGNORE: ["$."]``` (which basically ignores nothing - don't let it empty, the regex will match everything).
