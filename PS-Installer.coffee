@@ -18,7 +18,15 @@
  * Global object from the JSON
 ###
 
-G = $.evalFile "#{File($.fileName).path}/init.json"
+initFile = new File "#{File($.fileName).path}/init.json"
+unless initFile.exists
+	alert "Broken installer!\nThe init.json file is missing...\nPlease get in touch with the original developer."
+	throw new Error()
+
+initFile.open "r"
+initFileString = initFile.read()
+initFile.close() 
+eval "var G = #{initFileString}"
 
 ###
  * Utility functions

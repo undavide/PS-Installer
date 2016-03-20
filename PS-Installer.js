@@ -1,4 +1,3 @@
-
 /*
  * ===============================================
  * =      Adobe Photoshop Add-ons Installer      =
@@ -18,9 +17,22 @@
 /*
  * Global object from the JSON
  */
-var G, PSInstaller, PSU, e, errorMessage, psInstaller;
+var PSInstaller, PSU, e, errorMessage, initFile, initFileString, psInstaller;
 
-G = $.evalFile("" + (File($.fileName).path) + "/init.json");
+initFile = new File((File($.fileName).path) + "/init.json");
+
+if (!initFile.exists) {
+  alert("Broken installer!\nThe init.json file is missing...\nPlease get in touch with the original developer.");
+  throw new Error();
+}
+
+initFile.open("r");
+
+initFileString = initFile.read();
+
+initFile.close();
+
+eval("var G = " + initFileString);
 
 
 /*
@@ -46,7 +58,7 @@ PSU = (function(GLOBAL) {
     if (msg == null) {
       msg = '';
     }
-    return Error.runtimeError(9002, "" + msg + "\"" + f + "\": " + f.error + ".");
+    return Error.runtimeError(9002, msg + "\"" + f + "\": " + f.error + ".");
   };
   exceptionMessage = function(e) {
     var fname, str;
@@ -108,10 +120,10 @@ PSU = (function(GLOBAL) {
   };
 
   /*
-  	 * Sets up the logging
-  	 * @param  {string}  logFile      Log file name
-  	 * @param  {Boolean} isLogEnabled To log or not to log...
-  	 * @return {void}
+     * Sets up the logging
+     * @param  {string}  logFile      Log file name
+     * @param  {Boolean} isLogEnabled To log or not to log...
+     * @return {void}
    */
   init = function(logFile, isLogEnabled) {
     var file;
@@ -148,13 +160,13 @@ PSU = (function(GLOBAL) {
 PSInstaller = (function() {
 
   /*
-  	 * Set globals and start the logging
-  	 * @return {void}
+     * Set globals and start the logging
+     * @return {void}
    */
   function PSInstaller() {
 
     /* set the log file name */
-    G.LOG_FILE = "" + G.LOG_FILE_PATH + "/" + G.PRODUCT_NAME + ".log";
+    G.LOG_FILE = G.LOG_FILE_PATH + "/" + G.PRODUCT_NAME + ".log";
 
     /* init the logging */
     PSU.init(G.LOG_FILE, G.ENABLE_LOG);
@@ -174,18 +186,18 @@ PSInstaller = (function() {
 
 
   /*
-  	 * App compatibility check
-  	 * @return {}
+     * App compatibility check
+     * @return {}
    */
 
   PSInstaller.prototype.preflight = function() {
-    var _ref;
+    var ref;
     G.MIN_VERSION = G.MIN_VERSION || 0;
     G.MAX_VERSION = G.MAX_VERSION || 99;
     PSU.log("\nPreflight \n----------------------------");
-    if ((G.MIN_VERSION <= (_ref = G.CURRENT_PS_VERSION) && _ref <= G.MAX_VERSION)) {
+    if ((G.MIN_VERSION <= (ref = G.CURRENT_PS_VERSION) && ref <= G.MAX_VERSION)) {
       PSU.log("OK: PS version " + G.CURRENT_PS_VERSION + " in the range [" + G.MIN_VERSION + ", " + G.MAX_VERSION + "]");
-      alert("" + G.COMPANY + " - " + G.PRODUCT_NAME + "\nPress OK to start the installation.\nThe process is going to be completed in a short while.");
+      alert(G.COMPANY + " - " + G.PRODUCT_NAME + "\nPress OK to start the installation.\nThe process is going to be completed in a short while.");
       return true;
     } else {
       PSU.log("\nFAIL: PS version " + G.CURRENT_PS_VERSION + " not in the range [" + G.MIN_VERSION + ", " + G.MAX_VERSION + "]");
@@ -195,17 +207,17 @@ PSInstaller = (function() {
 
 
   /*
-  	 * Depending on the PS version, sets the available products options 
-  	 * to install (@productsToInstall) and log them
-  	 * @return {void}
+     * Depending on the PS version, sets the available products options 
+     * to install (@productsToInstall) and log them
+     * @return {void}
    */
 
   PSInstaller.prototype.init = function() {
-    var dependencyObj, product, that, _i, _len, _ref;
+    var dependencyObj, j, len, product, ref, that;
     that = this;
 
     /* Depending on the PS version, what to install
-    		(not the classiest way I know but it works)
+        (not the classiest way I know but it works)
      */
     dependencyObj = {
       "10": ["SCRIPT", "MAC_PLUGIN", "WIN_PLUGIN", "EXTRA"],
@@ -220,23 +232,23 @@ PSInstaller = (function() {
     /* Array */
     this.productsToInstall = dependencyObj[G.CURRENT_PS_VERSION];
     PSU.log("\nItems to be installed \n----------------------------");
-    _ref = this.productsToInstall;
-    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-      product = _ref[_i];
+    ref = this.productsToInstall;
+    for (j = 0, len = ref.length; j < len; j++) {
+      product = ref[j];
       PSU.log("- " + product);
     }
   };
 
   PSInstaller.prototype.copy = function() {
-    var allFiles, copyFiles, createRelativeFolder, destinationFolder, destinationPath, eachFolder, getFoldersList, ignoreRegExp, panelsPath, pluginsPath, product, saveFolder, scriptsPath, sourceFolder, that, _i, _j, _len, _len1, _ref, _ref1, _results;
+    var allFiles, copyFiles, createRelativeFolder, destinationFolder, destinationPath, eachFolder, getFoldersList, ignoreRegExp, j, k, len, len1, panelsPath, pluginsPath, product, ref, ref1, results, saveFolder, scriptsPath, sourceFolder, that;
     that = this;
 
     /*
-    		 * [createRelativeFolder description]
-    		 * @param  {folder} destination 	the destination Folder
-    		 * @param  {folder} origin      	the original, existing Folder
-    		 * @param  {folder} base 			the Folder used as a base
-    		 * @return {folder}	a new created folder in the destination
+         * [createRelativeFolder description]
+         * @param  {folder} destination   the destination Folder
+         * @param  {folder} origin        the original, existing Folder
+         * @param  {folder} base      the Folder used as a base
+         * @return {folder} a new created folder in the destination
      */
     createRelativeFolder = function(destination, origin, base) {
       var destinationArray, destinationToWriteArray, destinationToWriteFolder, destinationToWriteString, originArray, originBaseArray;
@@ -256,20 +268,20 @@ PSInstaller = (function() {
     };
 
     /*
-    		 * process the folder and fills the external
-    		 * array of folders foldersList
-    		 * @param  {folder} folder 
-    		 * @return {void}
+         * process the folder and fills the external
+         * array of folders foldersList
+         * @param  {folder} folder 
+         * @return {void}
      */
     getFoldersList = function(folder) {
-      var i, item, list, _i, _len;
+      var i, item, j, len, list;
       if (folder.constructor === String) {
         folder = new Folder(folder);
       }
       list = folder.getFiles();
       i = 0;
-      for (_i = 0, _len = list.length; _i < _len; _i++) {
-        item = list[_i];
+      for (j = 0, len = list.length; j < len; j++) {
+        item = list[j];
         if (item instanceof Folder) {
           that.foldersList.push(item);
           PSU.log("Folder: " + item.fsName);
@@ -279,71 +291,71 @@ PSInstaller = (function() {
     };
 
     /*
-    		 * Copy Files to a Folder
-    		 * @param  {array} files  Array of strings (File paths)
-    		 * @param  {string} folder Folder path to copy to
-    		 * @return {void}
+         * Copy Files to a Folder
+         * @param  {array} files  Array of strings (File paths)
+         * @param  {string} folder Folder path to copy to
+         * @return {void}
      */
     copyFiles = function(files, folder) {
-      var eachFile, file, filesList, _i, _j, _len, _len1, _results;
+      var eachFile, file, filesList, j, k, len, len1, results;
       filesList = [];
-      for (_i = 0, _len = files.length; _i < _len; _i++) {
-        file = files[_i];
+      for (j = 0, len = files.length; j < len; j++) {
+        file = files[j];
         filesList.push(decodeURI(file));
       }
-      _results = [];
-      for (_j = 0, _len1 = filesList.length; _j < _len1; _j++) {
-        eachFile = filesList[_j];
+      results = [];
+      for (k = 0, len1 = filesList.length; k < len1; k++) {
+        eachFile = filesList[k];
         if (File(eachFile).exists) {
-          File(eachFile).copy("" + folder + "/" + (File(eachFile).name));
+          File(eachFile).copy(folder + "/" + (File(eachFile).name));
 
           /* For the uninstaller */
-          that.installedFiles.push("" + folder + "/" + (File(eachFile).name));
-          _results.push(PSU.log("Copied:\t\t" + (File(eachFile).name)));
+          that.installedFiles.push(folder + "/" + (File(eachFile).name));
+          results.push(PSU.log("Copied:\t\t" + (File(eachFile).name)));
         } else {
-          _results.push(void 0);
+          results.push(void 0);
         }
       }
-      return _results;
+      return results;
     };
 
     /* Routine */
-    _ref = this.productsToInstall;
-    _results = [];
-    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-      product = _ref[_i];
+    ref = this.productsToInstall;
+    results = [];
+    for (j = 0, len = ref.length; j < len; j++) {
+      product = ref[j];
       if (!G[product]) {
         PSU.log("\n" + product + " - Nothing to install\n");
         continue;
       }
       switch (product) {
         case "SCRIPT":
-          scriptsPath = "" + app.path + "/" + (localize('$$$/ScriptingSupport/InstalledScripts=Presets/Scripts'));
-          destinationPath = "" + scriptsPath + "/" + G.COMPANY + "/" + G.PRODUCT_NAME;
+          scriptsPath = app.path + "/" + (localize('$$$/ScriptingSupport/InstalledScripts=Presets/Scripts'));
+          destinationPath = scriptsPath + "/" + G.COMPANY + "/" + G.PRODUCT_NAME;
           break;
         case "FLASH_PANEL":
-          panelsPath = "" + (G.SYSTEM_INSTALL ? Folder.commonFiles : Folder.userData) + "/Adobe/CS" + (G.CURRENT_PS_VERSION - 7) + "ServiceManager/extensions";
-          destinationPath = "" + panelsPath + "/" + G.PRODUCT_ID;
+          panelsPath = (G.SYSTEM_INSTALL ? Folder.commonFiles : Folder.userData) + "/Adobe/CS" + (G.CURRENT_PS_VERSION - 7) + "ServiceManager/extensions";
+          destinationPath = panelsPath + "/" + G.PRODUCT_ID;
           break;
         case "HTML_PANEL":
-          panelsPath = "" + (G.SYSTEM_INSTALL ? Folder.commonFiles : Folder.userData) + "/Adobe/" + (G.CURRENT_PS_VERSION === '14' ? 'CEPServiceManager4' : 'CEP') + "/extensions";
-          destinationPath = "" + panelsPath + "/" + G.PRODUCT_ID;
+          panelsPath = (G.SYSTEM_INSTALL ? Folder.commonFiles : Folder.userData) + "/Adobe/" + (G.CURRENT_PS_VERSION === '14' ? 'CEPServiceManager4' : 'CEP') + "/extensions";
+          destinationPath = panelsPath + "/" + G.PRODUCT_ID;
           break;
         case "MAC_PLUGIN":
           if ($.os.match(/windows/i)) {
             destinationPath = "";
             break;
           }
-          pluginsPath = "" + app.path + "/" + (localize('$$$/private/Plugins/DefaultPluginFolder=Plug-Ins'));
-          destinationPath = "" + pluginsPath + "/" + G.COMPANY;
+          pluginsPath = app.path + "/" + (localize('$$$/private/Plugins/DefaultPluginFolder=Plug-Ins'));
+          destinationPath = pluginsPath + "/" + G.COMPANY;
           break;
         case "WIN_PLUGIN":
           if (!$.os.match(/windows/i)) {
             destinationPath = "";
             break;
           }
-          pluginsPath = "" + app.path + "/" + (localize('$$$/private/Plugins/DefaultPluginFolder=Plug-Ins'));
-          destinationPath = "" + pluginsPath + "/" + G.COMPANY;
+          pluginsPath = app.path + "/" + (localize('$$$/private/Plugins/DefaultPluginFolder=Plug-Ins'));
+          destinationPath = pluginsPath + "/" + G.COMPANY;
           break;
         case "EXTRA":
 
@@ -363,7 +375,7 @@ PSInstaller = (function() {
       }
 
       /* Create the Folder for the source from the string path */
-      sourceFolder = Folder("" + G.CURRENT_PATH + "/" + G[product]);
+      sourceFolder = Folder(G.CURRENT_PATH + "/" + G[product]);
 
       /* Create the Folder for the destination from the string path */
       destinationFolder = Folder(destinationPath);
@@ -386,9 +398,9 @@ PSInstaller = (function() {
 
       /* RegExp for ignoring files to be copied */
       ignoreRegExp = G.IGNORE ? new RegExp(G.IGNORE.join("|"), "i") : new RegExp("$.");
-      _ref1 = this.foldersList;
-      for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
-        eachFolder = _ref1[_j];
+      ref1 = this.foldersList;
+      for (k = 0, len1 = ref1.length; k < len1; k++) {
+        eachFolder = ref1[k];
         saveFolder = createRelativeFolder(destinationFolder, eachFolder, sourceFolder);
         allFiles = eachFolder.getFiles(function(f) {
           if (f instanceof Folder) {
@@ -404,35 +416,35 @@ PSInstaller = (function() {
           copyFiles(allFiles, saveFolder);
         }
       }
-      _results.push(PSU.log("\nEnded copying files for " + product + "."));
+      results.push(PSU.log("\nEnded copying files for " + product + "."));
     }
-    return _results;
+    return results;
   };
 
   PSInstaller.prototype.wrapUp = function() {
     alert("Complete!\nAn installation LOG file has been created in:\n" + G.LOG_FILE);
     alert("Restart Photoshop\nYou must restart the application in orded to use " + G.PRODUCT_NAME + ", thank you!");
     if (G.README) {
-      return (File("" + G.CURRENT_PATH + "/" + G.README)).execute();
+      return (File(G.CURRENT_PATH + "/" + G.README)).execute();
     }
   };
 
   PSInstaller.prototype.createUninstaller = function() {
     var uninstall, uninstaller;
     uninstall = function(files, folders) {
-      var e, eachFile, eachFolder, file, folder, performInstallation, uninstallErrors, _i, _j, _len;
-      if (!(performInstallation = confirm("" + G.PRODUCT_NAME + " Version " + G.PRODUCT_VERSION + " Uninstaller\nAre you sure to remove " + G.PRODUCT_NAME + "?"))) {
+      var e, eachFile, eachFolder, file, folder, j, k, len, performInstallation, uninstallErrors;
+      if (!(performInstallation = confirm(G.PRODUCT_NAME + " Version " + G.PRODUCT_VERSION + " Uninstaller\nAre you sure to remove " + G.PRODUCT_NAME + "?"))) {
         return;
       }
       uninstallErrors = false;
-      G.LOG_FILE = "" + G.LOG_FILE_PATH + "/" + G.PRODUCT_NAME + " Uninstaller.log";
+      G.LOG_FILE = G.LOG_FILE_PATH + "/" + G.PRODUCT_NAME + " Uninstaller.log";
 
       /* init the logging */
       PSU.init(G.LOG_FILE, true);
       PSU.log("=======================================\n " + (new Date()) + "\n \tCompany: " + G.COMPANY + "\n \tProduct: " + G.PRODUCT_NAME + "\n \tProduct version: " + G.PRODUCT_VERSION + "\n \tApp: " + BridgeTalk.appName + "\n \tApp Version: " + app.version + "\n \tOS: " + $.os + "\n \tLocale: " + $.locale + "\n ---------------------------------------\n \tInstaller Version: " + G.INSTALLER_VERSION + "\n =======================================");
       PSU.log("\nRemoving FILES...");
-      for (_i = 0, _len = files.length; _i < _len; _i++) {
-        eachFile = files[_i];
+      for (j = 0, len = files.length; j < len; j++) {
+        eachFile = files[j];
         try {
           file = File(eachFile);
           PSU.log("Removing:\t" + file.fsName + "...");
@@ -445,8 +457,8 @@ PSInstaller = (function() {
         }
       }
       PSU.log("---------------------------------------\n Removing FOLDERS...");
-      for (_j = folders.length - 1; _j >= 0; _j += -1) {
-        eachFolder = folders[_j];
+      for (k = folders.length - 1; k >= 0; k += -1) {
+        eachFolder = folders[k];
         try {
           folder = Folder(eachFolder);
           PSU.log("Removing:\t" + folder.fsName + "...");
@@ -462,9 +474,9 @@ PSInstaller = (function() {
           throw Error("Restart Photoshop and see if the product has been uninstalled anyway.");
         }
       }
-      return alert("" + G.PRODUCT_NAME + " successfully Removed\nPlease Restart Photoshop for the changes to take effect.");
+      return alert(G.PRODUCT_NAME + " successfully Removed\nPlease Restart Photoshop for the changes to take effect.");
     };
-    uninstaller = new File("" + G.CURRENT_PATH + "/" + G.PRODUCT_NAME + "_V" + G.PRODUCT_VERSION + " - UNINSTALLER.jsx");
+    uninstaller = new File(G.CURRENT_PATH + "/" + G.PRODUCT_NAME + "_V" + G.PRODUCT_VERSION + " - UNINSTALLER.jsx");
     if (!uninstaller.open('w')) {
       throwFileError(uninstaller, "Unable to Write the Uninstaller file");
     }
@@ -474,9 +486,9 @@ PSInstaller = (function() {
     uninstaller.writeln("var G = " + (G.toSource()));
 
     /* This won't work :-/
-    		uninstaller.writeln "var PSU = #{PSU.toSource()}"
+        uninstaller.writeln "var PSU = #{PSU.toSource()}"
      */
-    uninstaller.writeln("var PSU=(function(GLOBAL){var createFolder,exceptionMessage,init,isMac,isWindows,log,that,throwFileError;that=this;this.enableLog=void 0;this.logFile=void 0;this.logFilePointer=void 0;isWindows=function(){return $.os.match(/windows/i);};isMac=function(){return!isWindows();};throwFileError=function(f,msg){if(msg==null){msg='';}return Error.runtimeError(9002,''+msg+''+f+': '+f.error+'.');};exceptionMessage=function(e){var fname,str;fname=!e.fileName?'???':decodeURI(e.fileName);str='  Message: '+e.message+'	File: '+fname+'\\tLine: '+(e.line||'???')+'\\n\\tError Name: '+e.name+'\\n\\tError Number: '+e.number;if($.stack){str+='  '+$.stack;}return str;};log=function(msg){var file;if(!that.enableLog){return;}file=that.logFilePointer;if(!file.open('e')){throwFileError(file,'Unable to open Log file');}file.seek(0,2);if(!file.writeln(''+msg)){return throwFileError(file,'Unable to write to log file');}};createFolder=function(fptr){var rc;if(fptr==null){Error.runtimeError(19,'No Folder name specified');}if(fptr.constructor===String){fptr=new Folder(fptr);}if(fptr instanceof File){return createFolder(fptr.parent);}if(fptr.exists){return true;}if(!(fptr instanceof Folder)){log(fptr.constructor);Error.runtimeError(21,'Folder is not a Folder?');}if((fptr.parent!=null)&&!fptr.parent.exists){if(!createFolder(fptr.parent)){return false;}}rc=fptr.create();if(!rc){Error.runtimeError(9002,'Unable to create folder '+fptr+' ('+fptr.error+') Please create it manually and run this script again.');}return rc;};init=function(logFile,isLogEnabled){var file;if(!isLogEnabled){return;}that.enableLog=isLogEnabled;that.logFile=logFile;file=new File(that.logFile);if(file.exists){file.remove();}if(!file.open('w')){throwFileError(file,'Unable to open Log file');}if(isMac()){file.lineFeed='unix';}that.logFilePointer=file;};return{'isMac':isMac,'exceptionMessage':exceptionMessage,'log':log,'createFolder':createFolder,'init':init};})(this);");
+    uninstaller.writeln("var PSU=(function(GLOBAL){var createFolder,exceptionMessage,init,isMac,isWindows,log,that,throwFileError;that=this;this.enableLog=void 0;this.logFile=void 0;this.logFilePointer=void 0;isWindows=function(){return $.os.match(/windows/i);};isMac=function(){return!isWindows();};throwFileError=function(f,msg){if(msg==null){msg='';}return Error.runtimeError(9002,''+msg+''+f+': '+f.error+'.');};exceptionMessage=function(e){var fname,str;fname=!e.fileName?'???':decodeURI(e.fileName);str='  Message: '+e.message+'  File: '+fname+'\\tLine: '+(e.line||'???')+'\\n\\tError Name: '+e.name+'\\n\\tError Number: '+e.number;if($.stack){str+='  '+$.stack;}return str;};log=function(msg){var file;if(!that.enableLog){return;}file=that.logFilePointer;if(!file.open('e')){throwFileError(file,'Unable to open Log file');}file.seek(0,2);if(!file.writeln(''+msg)){return throwFileError(file,'Unable to write to log file');}};createFolder=function(fptr){var rc;if(fptr==null){Error.runtimeError(19,'No Folder name specified');}if(fptr.constructor===String){fptr=new Folder(fptr);}if(fptr instanceof File){return createFolder(fptr.parent);}if(fptr.exists){return true;}if(!(fptr instanceof Folder)){log(fptr.constructor);Error.runtimeError(21,'Folder is not a Folder?');}if((fptr.parent!=null)&&!fptr.parent.exists){if(!createFolder(fptr.parent)){return false;}}rc=fptr.create();if(!rc){Error.runtimeError(9002,'Unable to create folder '+fptr+' ('+fptr.error+') Please create it manually and run this script again.');}return rc;};init=function(logFile,isLogEnabled){var file;if(!isLogEnabled){return;}that.enableLog=isLogEnabled;that.logFile=logFile;file=new File(that.logFile);if(file.exists){file.remove();}if(!file.open('w')){throwFileError(file,'Unable to open Log file');}if(isMac()){file.lineFeed='unix';}that.logFilePointer=file;};return{'isMac':isMac,'exceptionMessage':exceptionMessage,'log':log,'createFolder':createFolder,'init':init};})(this);");
     uninstaller.writeln("var filesToRemove = " + (this.installedFiles.toSource()) + ";");
     uninstaller.writeln("var foldersToRemove = " + (this.installedFolders.toSource()) + ";");
     uninstaller.writeln("var uninstall = " + (uninstall.toSource()) + ";");
