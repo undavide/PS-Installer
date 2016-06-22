@@ -190,6 +190,7 @@ class PSInstaller
 			"14" : [ "HTML_PANEL",  "SCRIPT", "MAC_PLUGIN", "WIN_PLUGIN", "EXTRA"]	# CC
 			"15" : [ "HTML_PANEL",  "SCRIPT", "MAC_PLUGIN", "WIN_PLUGIN", "EXTRA"]	# CC 2014
 			"16" : [ "HTML_PANEL",  "SCRIPT", "MAC_PLUGIN", "WIN_PLUGIN", "EXTRA"]	# CC 2015
+			"17" : [ "HTML_PANEL",  "SCRIPT", "MAC_PLUGIN", "WIN_PLUGIN", "EXTRA"]	# CC 2015.5
 		}
 
 		### Array ###
@@ -202,6 +203,98 @@ class PSInstaller
 			PSU.log "- #{product}"
 
 		return # init
+
+	###
+	 * TODO!!
+	 * @param  {[Object]} oldVersionsObj An Object containing info about stuff to clean before installing new ones
+	 * @return {[void]}                 
+	###
+	clean: (oldVersionsObj) ->
+
+		###
+		 * Delete a Folder (recursively, with ALL its content)
+		 * or a single file
+		 * @param  {File or Folder object} thingToDestroy The object to remove
+		###
+		recursivelyDeleteThing = (thingToDestroy) ->
+
+			inFolders = []
+			inFiles   = []
+			
+			processFolder = (fold) ->
+				fileList = fold.getFiles()
+				for aThing in fileList
+					if aThing instanceof Folder
+						inFolders.push aThing
+						processFolder aThing
+					else
+						inFiles.push aThing
+
+			if thingToDestroy instanceof File
+				try
+					thingToDestroy.remove()
+				catch e
+				
+				return
+
+			if thingToDestroy instanceof Folder
+
+				processFolder thingToDestroy
+				inFolders.unshift thingToDestroy
+				inFolders.reverse()
+				# $.writeln aFile for aFile in inFiles
+				# $.writeln aFolder for aFolder in inFolders
+				for aFile in inFiles
+					try
+						aFile.remove() 
+					catch e
+					
+				for aFolder in inFolders
+					try
+						aFolder.remove() 
+					catch e
+					
+				return
+			return
+		###
+		 * Delete recursively a File or Folder which CONTAINS a string,
+		 * e.g. recursivelyDeleteThing("this", "~/Desktop/TEST") will catch
+		 * "com.this.example" and so on and so forth
+		 * @param  {String} thingToDestroy What the File or Folder name should contain
+		 * @param  {String} startFolder    The start folder
+		###
+		recursivelyDeleteThingFromFolder = (thingToDestroy, startFolder) ->
+
+			inFolders = []
+			inFiles   = []
+			
+			escapeRegExp = (stringToGoIntoTheRegex) ->
+				stringToGoIntoTheRegex = stringToGoIntoTheRegex.name if stringToGoIntoTheRegex instanceof Folder
+				stringToGoIntoTheRegex.replace /[-\/\\^$*+?.()|[\]{}]/g, '\\$&'
+
+			processFolder = (fold) ->
+				fileList = fold.getFiles()
+				for aThing in fileList
+					if aThing instanceof Folder
+						inFolders.push aThing
+						processFolder aThing
+					else
+						inFiles.push aThing
+
+			processFolder Folder startFolder
+
+			matchString = escapeRegExp thingToDestroy
+			re = new RegExp matchString, "gi"
+
+			for aFile in inFiles
+				aFile.remove() if aFile.name.match re
+
+			for aFolder in inFolders
+				recursivelyDeleteThing aFolder if aFolder.name.match re
+				
+			return
+
+		return
 
 	copy: () ->
 
@@ -288,14 +381,20 @@ class PSInstaller
 					if $.os.match /windows/i 
 						destinationPath = ""
 						break
-					pluginsPath = "#{app.path}/#{localize '$$$/private/Plugins/DefaultPluginFolder=Plug-Ins'}"
+					if G.SHARED_PLUGINS and G.CURRENT_PS_VERSION > 13
+						pluginsPath = "#{Folder.commonFiles}/Adobe/#{localize '$$$/private/Plugins/DefaultPluginFolder=Plug-Ins'}/CC"
+					else
+						pluginsPath = "#{app.path}/#{localize '$$$/private/Plugins/DefaultPluginFolder=Plug-Ins'}"
 					destinationPath = "#{pluginsPath}/#{G.COMPANY}" 
 
 				when "WIN_PLUGIN"
 					unless $.os.match /windows/i 
 						destinationPath = ""
 						break
-					pluginsPath = "#{app.path}/#{localize '$$$/private/Plugins/DefaultPluginFolder=Plug-Ins'}"
+					if G.SHARED_PLUGINS and G.CURRENT_PS_VERSION > 13
+						pluginsPath = "#{Folder.commonFiles}/Adobe/#{localize '$$$/private/Plugins/DefaultPluginFolder=Plug-Ins'}/CC"
+					else
+						pluginsPath = "#{app.path}/#{localize '$$$/private/Plugins/DefaultPluginFolder=Plug-Ins'}"
 					destinationPath = "#{pluginsPath}/#{G.COMPANY}"
 
 				when "EXTRA"
@@ -414,6 +513,7 @@ try
 	psInstaller = new PSInstaller()
 	psInstaller.preflight()
 	psInstaller.init()
+	psInstaller.clean()
 	psInstaller.copy()
 	psInstaller.createUninstaller()
 	psInstaller.wrapUp()	

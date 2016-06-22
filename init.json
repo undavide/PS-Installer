@@ -31,6 +31,8 @@
 
   /* System vs. User installation */
   SYSTEM_INSTALL: false,
+  /* Use PS shared folder for plugins */
+  SHARED_PLUGINS: false,
 
   /* DEBUG ===================================== */
   INSTALLER_VERSION: "0.1.1",

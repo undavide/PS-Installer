@@ -226,7 +226,8 @@ PSInstaller = (function() {
       "13": ["FLASH_PANEL", "SCRIPT", "MAC_PLUGIN", "WIN_PLUGIN", "EXTRA"],
       "14": ["HTML_PANEL", "SCRIPT", "MAC_PLUGIN", "WIN_PLUGIN", "EXTRA"],
       "15": ["HTML_PANEL", "SCRIPT", "MAC_PLUGIN", "WIN_PLUGIN", "EXTRA"],
-      "16": ["HTML_PANEL", "SCRIPT", "MAC_PLUGIN", "WIN_PLUGIN", "EXTRA"]
+      "16": ["HTML_PANEL", "SCRIPT", "MAC_PLUGIN", "WIN_PLUGIN", "EXTRA"],
+      "17": ["HTML_PANEL", "SCRIPT", "MAC_PLUGIN", "WIN_PLUGIN", "EXTRA"]
     };
 
     /* Array */
@@ -237,6 +238,122 @@ PSInstaller = (function() {
       product = ref[j];
       PSU.log("- " + product);
     }
+  };
+
+
+  /*
+     * TODO!!
+     * @param  {[Object]} oldVersionsObj An Object containing info about stuff to clean before installing new ones
+     * @return {[void]}
+   */
+
+  PSInstaller.prototype.clean = function(oldVersionsObj) {
+
+    /*
+         * Delete a Folder (recursively, with ALL its content)
+         * or a single file
+         * @param  {File or Folder object} thingToDestroy The object to remove
+     */
+    var recursivelyDeleteThing, recursivelyDeleteThingFromFolder;
+    recursivelyDeleteThing = function(thingToDestroy) {
+      var aFile, aFolder, e, inFiles, inFolders, j, k, len, len1, processFolder;
+      inFolders = [];
+      inFiles = [];
+      processFolder = function(fold) {
+        var aThing, fileList, j, len, results;
+        fileList = fold.getFiles();
+        results = [];
+        for (j = 0, len = fileList.length; j < len; j++) {
+          aThing = fileList[j];
+          if (aThing instanceof Folder) {
+            inFolders.push(aThing);
+            results.push(processFolder(aThing));
+          } else {
+            results.push(inFiles.push(aThing));
+          }
+        }
+        return results;
+      };
+      if (thingToDestroy instanceof File) {
+        try {
+          thingToDestroy.remove();
+        } catch (_error) {
+          e = _error;
+        }
+        return;
+      }
+      if (thingToDestroy instanceof Folder) {
+        processFolder(thingToDestroy);
+        inFolders.unshift(thingToDestroy);
+        inFolders.reverse();
+        for (j = 0, len = inFiles.length; j < len; j++) {
+          aFile = inFiles[j];
+          try {
+            aFile.remove();
+          } catch (_error) {
+            e = _error;
+          }
+        }
+        for (k = 0, len1 = inFolders.length; k < len1; k++) {
+          aFolder = inFolders[k];
+          try {
+            aFolder.remove();
+          } catch (_error) {
+            e = _error;
+          }
+        }
+        return;
+      }
+    };
+
+    /*
+         * Delete recursively a File or Folder which CONTAINS a string,
+         * e.g. recursivelyDeleteThing("this", "~/Desktop/TEST") will catch
+         * "com.this.example" and so on and so forth
+         * @param  {String} thingToDestroy What the File or Folder name should contain
+         * @param  {String} startFolder    The start folder
+     */
+    recursivelyDeleteThingFromFolder = function(thingToDestroy, startFolder) {
+      var aFile, aFolder, escapeRegExp, inFiles, inFolders, j, k, len, len1, matchString, processFolder, re;
+      inFolders = [];
+      inFiles = [];
+      escapeRegExp = function(stringToGoIntoTheRegex) {
+        if (stringToGoIntoTheRegex instanceof Folder) {
+          stringToGoIntoTheRegex = stringToGoIntoTheRegex.name;
+        }
+        return stringToGoIntoTheRegex.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+      };
+      processFolder = function(fold) {
+        var aThing, fileList, j, len, results;
+        fileList = fold.getFiles();
+        results = [];
+        for (j = 0, len = fileList.length; j < len; j++) {
+          aThing = fileList[j];
+          if (aThing instanceof Folder) {
+            inFolders.push(aThing);
+            results.push(processFolder(aThing));
+          } else {
+            results.push(inFiles.push(aThing));
+          }
+        }
+        return results;
+      };
+      processFolder(Folder(startFolder));
+      matchString = escapeRegExp(thingToDestroy);
+      re = new RegExp(matchString, "gi");
+      for (j = 0, len = inFiles.length; j < len; j++) {
+        aFile = inFiles[j];
+        if (aFile.name.match(re)) {
+          aFile.remove();
+        }
+      }
+      for (k = 0, len1 = inFolders.length; k < len1; k++) {
+        aFolder = inFolders[k];
+        if (aFolder.name.match(re)) {
+          recursivelyDeleteThing(aFolder);
+        }
+      }
+    };
   };
 
   PSInstaller.prototype.copy = function() {
@@ -346,7 +463,11 @@ PSInstaller = (function() {
             destinationPath = "";
             break;
           }
-          pluginsPath = app.path + "/" + (localize('$$$/private/Plugins/DefaultPluginFolder=Plug-Ins'));
+          if (G.SHARED_PLUGINS && G.CURRENT_PS_VERSION > 13) {
+            pluginsPath = Folder.commonFiles + "/Adobe/" + (localize('$$$/private/Plugins/DefaultPluginFolder=Plug-Ins')) + "/CC";
+          } else {
+            pluginsPath = app.path + "/" + (localize('$$$/private/Plugins/DefaultPluginFolder=Plug-Ins'));
+          }
           destinationPath = pluginsPath + "/" + G.COMPANY;
           break;
         case "WIN_PLUGIN":
@@ -354,7 +475,11 @@ PSInstaller = (function() {
             destinationPath = "";
             break;
           }
-          pluginsPath = app.path + "/" + (localize('$$$/private/Plugins/DefaultPluginFolder=Plug-Ins'));
+          if (G.SHARED_PLUGINS && G.CURRENT_PS_VERSION > 13) {
+            pluginsPath = Folder.commonFiles + "/Adobe/" + (localize('$$$/private/Plugins/DefaultPluginFolder=Plug-Ins')) + "/CC";
+          } else {
+            pluginsPath = app.path + "/" + (localize('$$$/private/Plugins/DefaultPluginFolder=Plug-Ins'));
+          }
           destinationPath = pluginsPath + "/" + G.COMPANY;
           break;
         case "EXTRA":
@@ -504,6 +629,7 @@ try {
   psInstaller = new PSInstaller();
   psInstaller.preflight();
   psInstaller.init();
+  psInstaller.clean();
   psInstaller.copy();
   psInstaller.createUninstaller();
   psInstaller.wrapUp();

@@ -1,9 +1,9 @@
 PS-Installer
 ============
 
-Multi-version, semi-automatic installation script for Adobe Photoshop ® Add-ons (Adobe Extension Manager **has been discontinued** so it will be of no use for CC2015 products. Please have a look at this [CC2015 Survival Guide](http://www.davidebarranca.com/2015/06/html-panel-tips-17-cc2015-survival-guide/) for more info).
+Multi-version, semi-automatic installation script for Adobe Photoshop ® Add-ons (Adobe Extension Manager **has been discontinued** so it will be of no use for CC2015.x products. Please have a look at this [CC 2015 Survival Guide](http://www.davidebarranca.com/2015/06/html-panel-tips-17-cc2015-survival-guide/) and [CC 2015.5 Survival Guide](http://www.davidebarranca.com/2016/06/html-panel-tips-21-photoshop-cc2015-5-2016-survival-guide/)for more info). Compatibility is in the range CS3..CC2015.5.
 
-If you develop Photoshop add-ons and want them to be deployed to your users' machines avoiding AEM and/or Creative Clod app installation, this little project of mine might be of some use for you too.
+If you develop Photoshop add-ons and want them to be deployed to your users' machines avoiding AEM and/or Creative Cloud app installation, this little project of mine might be of some use for you too.
 
 ## Features
 
@@ -89,7 +89,9 @@ You can configure the installer using properties of the object contained in the 
 ### README
 [String] - Relative Path for the optional Readme file (e.g. "ASSETS/Readme.txt")
 ### SYSTEM_INSTALL
-[Boolean] - true: install the Panel (if present) for all users - false: install it only for the current user. There's an open issue under Windows with Photoshop @64bit and Global installation - please set ```SYSTEM_INSTALL = false```.
+[Boolean] - false: install the Panel (if present) for all users - false: install it only for the current user. There's an open issue under Windows with Photoshop @64bit and Global installation - please set ```SYSTEM_INSTALL = false```.
+### SHARED_PLUGINS
+[Boolean] - false: install the Filters (if present) in a shared location (for CC onwards) - false: install them on ```Photoshop <version>/Plug-ins/```. true: installs them on ```/Library/Application Support/Adobe/Plug-Ins/CC/``` on Mac and ```\Program Files\Common Files\Adobe\Plug-Ins\CC``` on Windows.
 ### ENABLE_LOG
 [Boolean] - Enable installation logging (highly recommended)
 ### LOG_FILE_PATH
