@@ -439,7 +439,7 @@ class PSInstaller
 			PSU.log "\nEnded copying files for #{product}."
 
 	wrapUp: () ->
-		alert "Complete!\nAn installation LOG file has been created in:\n#{G.LOG_FILE}"
+		alert "Complete!" + (G.ENABLE_LOG ? "\nAn installation LOG file has been created in:\n#{G.LOG_FILE}" : "")
 		alert "Restart Photoshop\nYou must restart the application in orded to use #{G.PRODUCT_NAME}, thank you!"
 		if G.README then (File "#{G.CURRENT_PATH}/#{G.README}").execute()
 
