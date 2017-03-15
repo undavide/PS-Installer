@@ -114,7 +114,7 @@ PSU = (function(GLOBAL) {
     /* eventually...! */
     rc = fptr.create();
     if (!rc) {
-      Error.runtimeError(9002, "Unable to create folder " + fptr + " (" + fptr.error + ")\nPlease create it manually and run this script again.");
+      Error.runtimeError(9002, "Unable to create folder " + fptr + " (" + fptr.error + ")\nPlease Run Photoshop in Admin Mode and run this script again.");
     }
     return rc;
   };
@@ -185,6 +185,9 @@ PSInstaller = (function() {
   }
 
 
+  function endsWith(str, suffix) {
+      return str.indexOf(suffix, str.length - suffix.length) !== -1;
+  }
   /*
      * App compatibility check
      * @return {}
@@ -227,9 +230,9 @@ PSInstaller = (function() {
       "14": ["HTML_PANEL", "SCRIPT", "MAC_PLUGIN", "WIN_PLUGIN", "EXTRA"],
       "15": ["HTML_PANEL", "SCRIPT", "MAC_PLUGIN", "WIN_PLUGIN", "EXTRA"],
       "16": ["HTML_PANEL", "SCRIPT", "MAC_PLUGIN", "WIN_PLUGIN", "EXTRA"],
-      "17": ["HTML_PANEL", "SCRIPT", "MAC_PLUGIN", "WIN_PLUGIN", "EXTRA"]
+      "17": ["HTML_PANEL", "SCRIPT", "MAC_PLUGIN", "WIN_PLUGIN", "EXTRA"],
+      "18": ["HTML_PANEL", "SCRIPT", "MAC_PLUGIN", "WIN_PLUGIN", "EXTRA"]
     };
-
     /* Array */
     this.productsToInstall = dependencyObj[G.CURRENT_PS_VERSION];
     PSU.log("\nItems to be installed \n----------------------------");
@@ -380,7 +383,14 @@ PSInstaller = (function() {
         destinationToWriteFolder.create();
       }
       PSU.log("Created Folder:\t" + destinationToWriteFolder.fsName);
-      that.installedFolders.push("" + destinationToWriteFolder.fsName);
+      if(!endsWith(destinationToWriteFolder.fsName,"Plug-Ins") || 
+        !endsWith(destinationToWriteFolder.fsName,"Generator") ||
+        !endsWith(destinationToWriteFolder.fsName,"extensions") ||
+        !endsWith(destinationToWriteFolder.fsName,"Scripts"))
+      {
+        that.installedFolders.push("" + destinationToWriteFolder.fsName);
+      }
+        
       return destinationToWriteFolder;
     };
 
@@ -483,9 +493,28 @@ PSInstaller = (function() {
           destinationPath = pluginsPath + "/" + G.COMPANY;
           break;
         case "EXTRA":
-
-          /* TODO */
-          destinationPath = G.EXTRA;
+          if (!$.os.match(/windows/i)) {
+            destinationPath = "";
+            break;
+          }
+          if (G.SHARED_PLUGINS && G.CURRENT_PS_VERSION > 13) {
+            pluginsPath = Folder.commonFiles + "/Adobe/" + (localize('$$$/private/Plugins/DefaultPluginFolder=Plug-Ins')) + "/CC";
+          } else {
+            pluginsPath = app.path + "/" + (localize('$$$/private/Plugins/DefaultPluginFolder=Plug-Ins'));
+          }
+          destinationPath = pluginsPath + "/Generator/";
+          /*if(!Folder(destinationPath).exists)
+          {
+            try{
+              var genFolder = new Folder(destinationPath);
+              genFolder.create();
+            }
+            catch(e)
+            {
+              alert("Couldn't Create Generator Folder. Please Re Run Installation in Photoshop Admin mode!");
+              throw Error("Couldn't create Generator Folder. Please Re Run Installation in Photoshop Admin Mode");
+            }
+          }*/
       }
       if (destinationPath === "") {
         continue;
@@ -547,7 +576,12 @@ PSInstaller = (function() {
   };
 
   PSInstaller.prototype.wrapUp = function() {
-    alert("Complete!" + (G.ENABLE_LOG ? "\nAn installation LOG file has been created in:\n#{G.LOG_FILE}" : ""));
+    var logMsg = "Complete!";
+    if(G.ENABLE_LOG)
+    {
+      logMsg += "\nAn installation LOG file has been created in:\n" + G.LOG_FILE;
+      alert(logMsg);
+    }
     alert("Restart Photoshop\nYou must restart the application in orded to use " + G.PRODUCT_NAME + ", thank you!");
     if (G.README) {
       return (File(G.CURRENT_PATH + "/" + G.README)).execute();
@@ -586,6 +620,12 @@ PSInstaller = (function() {
         eachFolder = folders[k];
         try {
           folder = Folder(eachFolder);
+          if(endsWith(destinationToWriteFolder.fsName,"Plug-Ins") || 
+              endsWith(destinationToWriteFolder.fsName,"Generator") ||
+              endsWith(destinationToWriteFolder.fsName,"extensions") ||
+              endsWith(destinationToWriteFolder.fsName,"Scripts")){
+            continue;
+          }
           PSU.log("Removing:\t" + folder.fsName + "...");
           folder.remove();
           PSU.log("Done!");
