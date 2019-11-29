@@ -551,7 +551,7 @@ PSInstaller = (function() {
   };
 
   PSInstaller.prototype.wrapUp = function() {
-    alert("Complete!\nAn installation LOG file has been created in:\n" + G.LOG_FILE);
+    alert("Complete!" + (G.ENABLE_LOG ? "\nAn installation LOG file has been created in:\n#{G.LOG_FILE}" : ""));
     alert("Restart Photoshop\nYou must restart the application in orded to use " + G.PRODUCT_NAME + ", thank you!");
     if (G.README) {
       return (File(G.CURRENT_PATH + "/" + G.README)).execute();
