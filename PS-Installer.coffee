@@ -3,14 +3,14 @@
  * =      Adobe Photoshop Add-ons Installer      =
  * =   (Because Adobe Extension Manager Sucks)   =
  * ===============================================
- * 
- *      Copyright: (c)2015, Davide Barranca
+ *
+ *      Copyright: (c)2015-2019, Davide Barranca
  * www.davidebarranca.com || www.cs-extensions.com
  * MIT License: http://opensource.org/licenses/MIT
- * 
+ *
  *   Thanks to xbytor for his xtools installer,
  *    which has been a source of inspiration!
- * 
+ *
  * ===============================================
 ###
 
@@ -25,12 +25,12 @@ unless initFile.exists
 
 initFile.open "r"
 initFileString = initFile.read()
-initFile.close() 
+initFile.close()
 eval "var G = #{initFileString}"
 
 ###
  * Utility functions
- * Mostly borrowed from xbytor's xtools installer 
+ * Mostly borrowed from xbytor's xtools installer
  * http://sourceforge.net/projects/ps-scripts/files/xtools/
  * License: http://www.opensource.org/licenses/bsd-license.php
 ###
@@ -61,9 +61,9 @@ PSU = ((GLOBAL) ->
 		unless file.writeln "#{msg}" then throwFileError file, "Unable to write to log file"
 
 	createFolder = (fptr) ->
-		unless fptr? then Error.runtimeError 19, "No Folder name specified" 
+		unless fptr? then Error.runtimeError 19, "No Folder name specified"
 		fptr = new Folder fptr if fptr.constructor is String
-		
+
 		### Recursion if the arg is a File ###
 		return createFolder fptr.parent if fptr instanceof File
 
@@ -86,7 +86,7 @@ PSU = ((GLOBAL) ->
 	 * Sets up the logging
 	 * @param  {string}  logFile      Log file name
 	 * @param  {Boolean} isLogEnabled To log or not to log...
-	 * @return {void}               
+	 * @return {void}
 	###
 	init = (logFile, isLogEnabled) ->
 		return unless isLogEnabled
@@ -115,11 +115,11 @@ class PSInstaller
 
 	###
 	 * Set globals and start the logging
-	 * @return {void} 
+	 * @return {void}
 	###
 	constructor: () ->
-        
-        
+
+
 		### set the log file name ###
 		G.LOG_FILE = "#{G.LOG_FILE_PATH}/#{G.PRODUCT_NAME}.log"
 		### init the logging ###
@@ -151,7 +151,7 @@ class PSInstaller
 
 	###
 	 * App compatibility check
-	 * @return {} 
+	 * @return {}
 	###
 	preflight: () ->
 		G.MIN_VERSION = G.MIN_VERSION || 0
@@ -160,19 +160,19 @@ class PSInstaller
 		PSU.log "\nPreflight
 				\n----------------------------"
 
-		if G.MIN_VERSION <= G.CURRENT_PS_VERSION <= G.MAX_VERSION 
+		if G.MIN_VERSION <= G.CURRENT_PS_VERSION <= G.MAX_VERSION
 
 			PSU.log "OK: PS version #{G.CURRENT_PS_VERSION} in the range [#{G.MIN_VERSION}, #{G.MAX_VERSION}]"
 			alert "#{G.COMPANY} - #{G.PRODUCT_NAME}\nPress OK to start the installation.\nThe process is going to be completed in a short while."
-			return true 
+			return true
 
-		else 
+		else
 			PSU.log "\nFAIL: PS version #{G.CURRENT_PS_VERSION} not in the range [#{G.MIN_VERSION}, #{G.MAX_VERSION}]"
 			Error.runtimeError 9002, "Bad Photoshop version.\n#{G.CURRENT_PS_VERSION} not in the range [#{G.MIN_VERSION}, #{G.MAX_VERSION}]"
 
 
 	###
-	 * Depending on the PS version, sets the available products options 
+	 * Depending on the PS version, sets the available products options
 	 * to install (@productsToInstall) and log them
 	 * @return {void}
 	###
@@ -191,6 +191,10 @@ class PSInstaller
 			"15" : [ "HTML_PANEL",  "SCRIPT", "MAC_PLUGIN", "WIN_PLUGIN", "EXTRA"]	# CC 2014
 			"16" : [ "HTML_PANEL",  "SCRIPT", "MAC_PLUGIN", "WIN_PLUGIN", "EXTRA"]	# CC 2015
 			"17" : [ "HTML_PANEL",  "SCRIPT", "MAC_PLUGIN", "WIN_PLUGIN", "EXTRA"]	# CC 2015.5
+			"18" : [ "HTML_PANEL",  "SCRIPT", "MAC_PLUGIN", "WIN_PLUGIN", "EXTRA"]	# CC 2017
+			"19" : [ "HTML_PANEL",  "SCRIPT", "MAC_PLUGIN", "WIN_PLUGIN", "EXTRA"]	# CC 2018
+			"20" : [ "HTML_PANEL",  "SCRIPT", "MAC_PLUGIN", "WIN_PLUGIN", "EXTRA"]	# CC 2019
+			"21" : [ "HTML_PANEL",  "SCRIPT", "MAC_PLUGIN", "WIN_PLUGIN", "EXTRA"]	# 2020
 		}
 
 		### Array ###
@@ -207,7 +211,7 @@ class PSInstaller
 	###
 	 * TODO!!
 	 * @param  {[Object]} oldVersionsObj An Object containing info about stuff to clean before installing new ones
-	 * @return {[void]}                 
+	 * @return {[void]}
 	###
 	clean: (oldVersionsObj) ->
 
@@ -220,7 +224,7 @@ class PSInstaller
 
 			inFolders = []
 			inFiles   = []
-			
+
 			processFolder = (fold) ->
 				fileList = fold.getFiles()
 				for aThing in fileList
@@ -234,7 +238,7 @@ class PSInstaller
 				try
 					thingToDestroy.remove()
 				catch e
-				
+
 				return
 
 			if thingToDestroy instanceof Folder
@@ -246,14 +250,14 @@ class PSInstaller
 				# $.writeln aFolder for aFolder in inFolders
 				for aFile in inFiles
 					try
-						aFile.remove() 
+						aFile.remove()
 					catch e
-					
+
 				for aFolder in inFolders
 					try
-						aFolder.remove() 
+						aFolder.remove()
 					catch e
-					
+
 				return
 			return
 		###
@@ -267,7 +271,7 @@ class PSInstaller
 
 			inFolders = []
 			inFiles   = []
-			
+
 			escapeRegExp = (stringToGoIntoTheRegex) ->
 				stringToGoIntoTheRegex = stringToGoIntoTheRegex.name if stringToGoIntoTheRegex instanceof Folder
 				stringToGoIntoTheRegex.replace /[-\/\\^$*+?.()|[\]{}]/g, '\\$&'
@@ -291,7 +295,7 @@ class PSInstaller
 
 			for aFolder in inFolders
 				recursivelyDeleteThing aFolder if aFolder.name.match re
-				
+
 			return
 
 		return
@@ -326,10 +330,10 @@ class PSInstaller
 		###
 		 * process the folder and fills the external
 		 * array of folders foldersList
-		 * @param  {folder} folder 
-		 * @return {void} 	
+		 * @param  {folder} folder
+		 * @return {void}
 		###
-		getFoldersList = (folder) ->	
+		getFoldersList = (folder) ->
 			if folder.constructor is String then folder = new Folder folder
 			list = folder.getFiles()
 			i = 0
@@ -344,13 +348,13 @@ class PSInstaller
 		 * Copy Files to a Folder
 		 * @param  {array} files  Array of strings (File paths)
 		 * @param  {string} folder Folder path to copy to
-		 * @return {void}        
+		 * @return {void}
 		###
 		copyFiles = (files, folder) ->
 			filesList = []
 			filesList.push decodeURI file for file in files
 			for eachFile in filesList
-				if File(eachFile).exists 
+				if File(eachFile).exists
 					File(eachFile).copy "#{folder}/#{File(eachFile).name}"
 					### For the uninstaller ###
 					that.installedFiles.push "#{folder}/#{File(eachFile).name}"
@@ -367,28 +371,28 @@ class PSInstaller
 
 				when "SCRIPT"
 					scriptsPath = "#{app.path}/#{localize '$$$/ScriptingSupport/InstalledScripts=Presets/Scripts'}"
-					destinationPath = "#{scriptsPath}/#{G.COMPANY}/#{G.PRODUCT_NAME}" 
-					
+					destinationPath = "#{scriptsPath}/#{G.COMPANY}/#{G.PRODUCT_NAME}"
+
 				when "FLASH_PANEL"
 					panelsPath = "#{if G.SYSTEM_INSTALL then Folder.commonFiles else Folder.userData}/Adobe/CS#{G.CURRENT_PS_VERSION - 7}ServiceManager/extensions"
-					destinationPath = "#{panelsPath}/#{G.PRODUCT_ID}" 
+					destinationPath = "#{panelsPath}/#{G.PRODUCT_ID}"
 
 				when "HTML_PANEL"
 					panelsPath = "#{if G.SYSTEM_INSTALL then Folder.commonFiles else Folder.userData}/Adobe/#{if G.CURRENT_PS_VERSION is '14' then 'CEPServiceManager4' else 'CEP'}/extensions"
-					destinationPath = "#{panelsPath}/#{G.PRODUCT_ID}" 
+					destinationPath = "#{panelsPath}/#{G.PRODUCT_ID}"
 
 				when "MAC_PLUGIN"
-					if $.os.match /windows/i 
+					if $.os.match /windows/i
 						destinationPath = ""
 						break
 					if G.SHARED_PLUGINS and G.CURRENT_PS_VERSION > 13
 						pluginsPath = "#{Folder.commonFiles}/Adobe/#{localize '$$$/private/Plugins/DefaultPluginFolder=Plug-Ins'}/CC"
 					else
 						pluginsPath = "#{app.path}/#{localize '$$$/private/Plugins/DefaultPluginFolder=Plug-Ins'}"
-					destinationPath = "#{pluginsPath}/#{G.COMPANY}" 
+					destinationPath = "#{pluginsPath}/#{G.COMPANY}"
 
 				when "WIN_PLUGIN"
-					unless $.os.match /windows/i 
+					unless $.os.match /windows/i
 						destinationPath = ""
 						break
 					if G.SHARED_PLUGINS and G.CURRENT_PS_VERSION > 13
@@ -399,8 +403,8 @@ class PSInstaller
 
 				when "EXTRA"
 					### TODO ###
-					destinationPath = G.EXTRA 
-					
+					destinationPath = G.EXTRA
+
 			if destinationPath is "" then continue
 			PSU.log "\n\nAdding #{product}\n----------------------------\nDestination folder: #{Folder(destinationPath).fsName}"
 			### Create destination Folder ###
@@ -409,7 +413,7 @@ class PSInstaller
 			### Create the Folder for the source from the string path ###
 			sourceFolder = Folder "#{G.CURRENT_PATH}/#{G[product]}"
 			### Create the Folder for the destination from the string path ###
-			destinationFolder = Folder destinationPath 
+			destinationFolder = Folder destinationPath
 			### Reset the array containing all the folders to be created in the destination ###
 			@foldersList = []
 			### Fill the foldersList ###
@@ -427,14 +431,14 @@ class PSInstaller
 
 			for eachFolder in @foldersList
 				saveFolder = createRelativeFolder destinationFolder, eachFolder, sourceFolder
-				allFiles = eachFolder.getFiles( (f) -> 
-					if (f instanceof Folder) 
-						return false 
-					else 
+				allFiles = eachFolder.getFiles( (f) ->
+					if (f instanceof Folder)
+						return false
+					else
 						if (f.name.match ignoreRegExp)? then return false
 						return true
 				)
-				if allFiles.length then copyFiles allFiles, saveFolder 
+				if allFiles.length then copyFiles allFiles, saveFolder
 
 			PSU.log "\nEnded copying files for #{product}."
 
@@ -444,7 +448,7 @@ class PSInstaller
 		if G.README then (File "#{G.CURRENT_PATH}/#{G.README}").execute()
 
 	createUninstaller: () ->
-		
+
 		uninstall = (files, folders) ->
 			return unless performInstallation = confirm "#{G.PRODUCT_NAME} Version #{G.PRODUCT_VERSION} Uninstaller\nAre you sure to remove #{G.PRODUCT_NAME}?"
 			uninstallErrors = false
@@ -465,11 +469,11 @@ class PSInstaller
 				\tInstaller Version: #{G.INSTALLER_VERSION}\n
 				=======================================
 				"
-			
+
 			PSU.log "\nRemoving FILES..."
 
 			for eachFile in files
-				try 
+				try
 					file = File eachFile
 					PSU.log "Removing:\t#{file.fsName}..."
 					file.remove()
@@ -489,11 +493,11 @@ class PSInstaller
 				catch e
 					PSU.log "ERROR!"
 					uninstallErrors = true
-				
-				if uninstallErrors 
+
+				if uninstallErrors
 					alert "Something went wrong!\nA uninstallation LOG file has been created in:\n#{G.LOG_FILE}, please send it to #{G.CONTACT_INFO}"
 					throw Error "Restart Photoshop and see if the product has been uninstalled anyway."
-			
+
 			alert "#{G.PRODUCT_NAME} successfully Removed\nPlease Restart Photoshop for the changes to take effect."
 
 		uninstaller = new File "#{G.CURRENT_PATH}/#{G.PRODUCT_NAME}_V#{G.PRODUCT_VERSION} - UNINSTALLER.jsx"
@@ -516,7 +520,7 @@ try
 	psInstaller.clean()
 	psInstaller.copy()
 	psInstaller.createUninstaller()
-	psInstaller.wrapUp()	
+	psInstaller.wrapUp()
 catch e
 	errorMessage = "Installation failed: #{PSU.exceptionMessage e}"
 	PSU.log errorMessage

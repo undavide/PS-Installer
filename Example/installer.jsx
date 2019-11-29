@@ -3,14 +3,14 @@
  * =      Adobe Photoshop Add-ons Installer      =
  * =   (Because Adobe Extension Manager Sucks)   =
  * ===============================================
- * 
- *      Copyright: (c)2015, Davide Barranca
+ *
+ *      Copyright: (c)2015-2019, Davide Barranca
  * www.davidebarranca.com || www.cs-extensions.com
  * MIT License: http://opensource.org/licenses/MIT
- * 
+ *
  *   Thanks to xbytor for his xtools installer,
  *    which has been a source of inspiration!
- * 
+ *
  * ===============================================
  */
 
@@ -37,7 +37,7 @@ eval("var G = " + initFileString);
 
 /*
  * Utility functions
- * Mostly borrowed from xbytor's xtools installer 
+ * Mostly borrowed from xbytor's xtools installer
  * http://sourceforge.net/projects/ps-scripts/files/xtools/
  * License: http://www.opensource.org/licenses/bsd-license.php
  */
@@ -207,7 +207,7 @@ PSInstaller = (function() {
 
 
   /*
-     * Depending on the PS version, sets the available products options 
+     * Depending on the PS version, sets the available products options
      * to install (@productsToInstall) and log them
      * @return {void}
    */
@@ -227,7 +227,11 @@ PSInstaller = (function() {
       "14": ["HTML_PANEL", "SCRIPT", "MAC_PLUGIN", "WIN_PLUGIN", "EXTRA"],
       "15": ["HTML_PANEL", "SCRIPT", "MAC_PLUGIN", "WIN_PLUGIN", "EXTRA"],
       "16": ["HTML_PANEL", "SCRIPT", "MAC_PLUGIN", "WIN_PLUGIN", "EXTRA"],
-      "17": ["HTML_PANEL", "SCRIPT", "MAC_PLUGIN", "WIN_PLUGIN", "EXTRA"]
+      "17": ["HTML_PANEL", "SCRIPT", "MAC_PLUGIN", "WIN_PLUGIN", "EXTRA"],
+      "18": ["HTML_PANEL", "SCRIPT", "MAC_PLUGIN", "WIN_PLUGIN", "EXTRA"],
+      "19": ["HTML_PANEL", "SCRIPT", "MAC_PLUGIN", "WIN_PLUGIN", "EXTRA"],
+      "20": ["HTML_PANEL", "SCRIPT", "MAC_PLUGIN", "WIN_PLUGIN", "EXTRA"],
+      "21": ["HTML_PANEL", "SCRIPT", "MAC_PLUGIN", "WIN_PLUGIN", "EXTRA"]
     };
 
     /* Array */
@@ -387,7 +391,7 @@ PSInstaller = (function() {
     /*
          * process the folder and fills the external
          * array of folders foldersList
-         * @param  {folder} folder 
+         * @param  {folder} folder
          * @return {void}
      */
     getFoldersList = function(folder) {
